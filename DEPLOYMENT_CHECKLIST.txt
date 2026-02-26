@@ -1,0 +1,130 @@
+╔══════════════════════════════════════════════════════════════╗
+║          NBA CAP MANAGER - DEPLOYMENT CHECKLIST             ║
+╚══════════════════════════════════════════════════════════════╝
+
+📋 FOLLOW THESE STEPS IN ORDER:
+
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 1: DELETE OLD REPOSITORY                               │
+└─────────────────────────────────────────────────────────────┘
+  □ Go to github.com/willgottlieb/nba-cap-manager
+  □ Click Settings
+  □ Scroll to Danger Zone
+  □ Delete repository
+  □ Confirm deletion
+
+
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 2: CREATE NEW REPOSITORY                               │
+└─────────────────────────────────────────────────────────────┘
+  □ Go to github.com/new
+  □ Name: nba-cap-manager
+  □ Make it PUBLIC
+  □ Check "Add a README file"
+  □ Click "Create repository"
+
+
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 3: UPLOAD FILES                                        │
+└─────────────────────────────────────────────────────────────┘
+  □ Click "Add file" → "Upload files"
+  □ Upload these 5 files:
+     ✓ index.html
+     ✓ data.js
+     ✓ app.js
+     ✓ styles.css
+     ✓ README.md
+  □ Delete the default README.md first if needed
+  □ Commit message: "Initial commit"
+  □ Click "Commit changes"
+
+
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 4: ENABLE GITHUB PAGES                                 │
+└─────────────────────────────────────────────────────────────┘
+  □ Go to Settings
+  □ Click Pages (left sidebar)
+  □ Source: main branch
+  □ Folder: / (root)
+  □ Click Save
+  □ WAIT 2 MINUTES ⏱️
+
+
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 5: TEST YOUR SITE                                      │
+└─────────────────────────────────────────────────────────────┘
+  □ Visit: willgottlieb.github.io/nba-cap-manager
+  □ You should see the team selection screen
+  □ If 404: wait another minute and refresh
+  □ If still broken: check troubleshooting below
+
+
+╔══════════════════════════════════════════════════════════════╗
+║                     TROUBLESHOOTING                          ║
+╚══════════════════════════════════════════════════════════════╝
+
+❌ PROBLEM: 404 Error
+✅ SOLUTION: 
+   - Wait 2-3 minutes after enabling Pages
+   - Hard refresh: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
+   - Check that index.html is in root folder
+
+❌ PROBLEM: Blank Page
+✅ SOLUTION:
+   - Press F12 to open console
+   - Look for red errors
+   - Make sure ALL 5 files are uploaded
+   - Check file names match exactly (case sensitive!)
+
+❌ PROBLEM: No Teams Showing
+✅ SOLUTION:
+   - Check if data.js uploaded correctly
+   - Open data.js and look for syntax errors
+   - Make sure there are no missing commas
+
+
+╔══════════════════════════════════════════════════════════════╗
+║                    FILES YOU NEED                            ║
+╚══════════════════════════════════════════════════════════════╝
+
+Your repo should have EXACTLY these 5 files:
+
+1. index.html    ← Main entry point
+2. data.js       ← NBA rosters & data (UPDATE THIS!)
+3. app.js        ← React application
+4. styles.css    ← Custom styling
+5. README.md     ← Documentation
+
+
+╔══════════════════════════════════════════════════════════════╗
+║              HOW TO UPDATE ROSTERS (LATER)                   ║
+╚══════════════════════════════════════════════════════════════╝
+
+To update player stats or add teams:
+1. Go to your repo
+2. Click on data.js
+3. Click the pencil icon (✏️) to edit
+4. Make your changes
+5. Scroll down → Commit changes
+6. Wait 30 seconds → Refresh your site
+
+That's it! GitHub Pages updates automatically.
+
+
+╔══════════════════════════════════════════════════════════════╗
+║                  FINAL VERIFICATION                          ║
+╚══════════════════════════════════════════════════════════════╝
+
+Before finishing, check:
+□ All 5 files are in the repo
+□ GitHub Pages is enabled in Settings
+□ Your site loads at willgottlieb.github.io/nba-cap-manager
+□ You can select a team
+□ Roster shows players
+
+If all checked ✅ - YOU'RE DONE! 🎉
+
+
+═══════════════════════════════════════════════════════════════
+Need help? Check README.md for detailed instructions
+═══════════════════════════════════════════════════════════════
