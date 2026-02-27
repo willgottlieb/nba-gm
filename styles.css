@@ -1,10 +1,14 @@
-/* NBA Cap Manager - Custom Styles */
+/* NBA GM - Custom Styles */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
 body {
     font-family: 'Inter', sans-serif;
-    margin: 0;
-    padding: 0;
 }
 
 /* Gradient Background */
@@ -15,6 +19,7 @@ body {
 /* Card Hover Effect */
 .card-hover {
     transition: all 0.3s ease;
+    cursor: pointer;
 }
 
 .card-hover:hover {
@@ -22,35 +27,56 @@ body {
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
-/* Team Logo Circle */
-.team-logo {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 16px;
-    color: white;
+/* Table Styles */
+table {
+    border-collapse: collapse;
 }
 
-/* Stat Badge */
-.stat-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 12px;
+th {
     font-weight: 600;
 }
 
-/* Position Badge */
-.position-badge {
-    display: inline-block;
-    padding: 2px 8px;
+/* Sticky column shadow */
+.sticky {
+    position: sticky;
+    background-color: white;
+}
+
+tr:hover .sticky {
+    background-color: #f9fafb;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    table {
+        font-size: 12px;
+    }
+    
+    th, td {
+        padding: 8px 12px !important;
+    }
+    
+    .sticky {
+        min-width: 150px;
+    }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
     border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    background: #e5e7eb;
-    color: #374151;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
