@@ -1,25 +1,303 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NBA GM | Manage Your Team's Roster</title>
-    <meta name="description" content="NBA GM simulator - manage rosters, salary cap, free agents, and draft picks">
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50">
-    <div id="root"></div>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NBA GM - Salary Cap Manager</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-    <!-- React & Babel -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <!-- NBA Data -->
-    <script src="data.js"></script>
-    
-    <!-- Main App -->
-    <script type="text/babel" src="app.js"></script>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --team-color:#CE1141;
+  --team-dark:#a00d33;
+  --bg0:#0a0a0a; --bg1:#1a1a1a; --bg2:#2a2a2a; --bg3:#333;
+  --txt:#fff; --txt2:#a0a0a0;
+  --green:#10b981; --amber:#f59e0b; --danger:#ef4444;
+  --pink:#ec4899; --blue:#3b82f6; --gray:#6b7280; --purple:#a855f7;
+}
+
+body {
+  font-family:'Inter',sans-serif;
+  background:linear-gradient(135deg,var(--bg0) 0%,#1a0a0f 100%);
+  color:var(--txt); min-height:100vh; padding:20px;
+}
+
+.container { max-width:1900px; margin:0 auto; }
+
+/* ═══ TEAM SELECTION ═══ */
+.team-select-screen {
+  max-width:1400px; margin:60px auto; padding:40px;
+}
+.team-select-header {
+  text-align:center; margin-bottom:50px;
+}
+.team-select-header h1 {
+  font-size:52px; font-weight:900; letter-spacing:-.03em;
+  background:linear-gradient(135deg,#fff 0%,#888 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  margin-bottom:16px;
+}
+.team-select-header p {
+  font-size:18px; color:var(--txt2); font-weight:500;
+}
+.team-grid {
+  display:grid; grid-template-columns:repeat(5,1fr); gap:24px;
+}
+.team-card {
+  background:var(--bg1); border:2px solid var(--bg3); border-radius:16px;
+  padding:32px 24px; cursor:pointer; transition:.3s; text-align:center;
+}
+.team-card:hover {
+  transform:translateY(-8px); border-color:var(--team-color);
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+.team-logo {
+  width:80px; height:80px; margin:0 auto 20px; object-fit:contain;
+}
+.team-name {
+  font-size:16px; font-weight:700; color:var(--txt);
+}
+
+/* ═══ HEADER ═══ */
+.header {
+  background:linear-gradient(135deg,var(--team-color),var(--team-dark));
+  padding:28px 32px; border-radius:14px; margin-bottom:24px;
+  box-shadow:0 16px 48px rgba(206,17,65,.3);
+  position:relative; overflow:hidden;
+}
+.header::before {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(circle at 80% 50%,rgba(255,255,255,.07) 0%,transparent 60%);
+}
+.header > * { position:relative; z-index:1; }
+.header-top {
+  display:flex; align-items:center; gap:20px; margin-bottom:12px;
+}
+.header-logo {
+  width:64px; height:64px; object-fit:contain;
+}
+.header h1 { font-size:38px; font-weight:800; letter-spacing:-.02em; }
+.header .sub { font-size:14px; opacity:.9; font-weight:400; }
+.back-btn {
+  background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.2);
+  color:#fff; padding:10px 20px; border-radius:8px; font-size:13px;
+  font-weight:600; cursor:pointer; transition:.2s; margin-left:auto;
+}
+.back-btn:hover {
+  background:rgba(255,255,255,.25);
+}
+
+/* ═══ CONTROLS ═══ */
+.controls {
+  display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;
+  margin-bottom:30px; align-items:stretch; max-height:90px;
+}
+.controls-left {
+  display:grid; grid-template-columns:1fr 1fr 1fr; grid-template-rows:1fr 1fr; gap:8px;
+}
+.btn {
+  background:var(--bg1); border:1px solid var(--bg3); color:var(--txt);
+  padding:11px 18px; border-radius:8px; font-size:12px; font-weight:600;
+  cursor:pointer; transition:.2s; display:flex; align-items:center;
+  justify-content:center; gap:6px; white-space:nowrap; height:auto;
+}
+.btn:hover {
+  background:var(--bg2); transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(0,0,0,.3);
+}
+.btn-red {
+  background:var(--team-color); border-color:var(--team-color);
+}
+.btn-red:hover {
+  background:var(--team-dark);
+}
+
+/* ═══ CAP SUMMARY ═══ */
+.cap-summary {
+  background:linear-gradient(to bottom, var(--bg1), var(--bg2));
+  border:1px solid var(--bg3); border-radius:10px; padding:12px 16px;
+  display:flex; flex-direction:column; position:relative; overflow:hidden;
+}
+.cap-summary::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background:linear-gradient(90deg, var(--team-color), var(--green));
+}
+.cap-summary-title {
+  font-weight:800; font-size:11px; color:var(--txt);
+  text-transform:uppercase; text-align:center; margin-bottom:10px;
+  letter-spacing:.08em;
+}
+.cap-summary-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:12px;
+}
+.cap-summary-item {
+  background:rgba(0,0,0,0.3); border-radius:6px; padding:10px 12px;
+  border:1px solid rgba(255,255,255,0.05); text-align:center;
+}
+.cap-summary-label {
+  font-size:9px; color:rgba(255,255,255,0.5); margin-bottom:4px;
+  text-transform:uppercase; font-weight:600;
+}
+.cap-summary-value {
+  font-size:20px; font-weight:900;
+}
+.cap-value-green { color:var(--green); }
+.cap-value-red { color:var(--danger); }
+
+/* ═══ LEGEND ═══ */
+.legend {
+  background:var(--bg1); border:1px solid var(--bg3); border-radius:10px;
+  padding:10px 14px; display:flex; flex-direction:column; gap:6px;
+  align-items:center; justify-content:center; margin:0;
+}
+.legend-title {
+  font-weight:700; font-size:10px; color:var(--txt2);
+  text-transform:uppercase; letter-spacing:.06em;
+}
+.legend-items {
+  display:flex; gap:10px; align-items:center; font-size:11px;
+}
+.legend-item {
+  display:flex; align-items:center; gap:6px;
+}
+.lg-badge {
+  padding:3px 7px; border-radius:4px; font-size:10px;
+  font-weight:700; letter-spacing:.04em;
+}
+.lg-gtd { background:rgba(16,185,129,.15); color:var(--green); border:1px solid rgba(16,185,129,.3); }
+.lg-po { background:rgba(59,130,246,.15); color:var(--blue); border:1px solid rgba(59,130,246,.3); }
+.lg-to { background:rgba(236,72,153,.15); color:var(--pink); border:1px solid rgba(236,72,153,.3); }
+
+/* ═══ SECTION ═══ */
+.section {
+  background:var(--bg1); border:1px solid var(--bg3); border-radius:10px;
+  padding:0; margin-bottom:20px; overflow:hidden;
+}
+.section-hdr {
+  background:var(--bg2); padding:14px 20px; font-weight:700; font-size:14px;
+  letter-spacing:.02em; border-bottom:1px solid var(--bg3);
+}
+
+/* ═══ TABLE ═══ */
+.tbl-wrap { overflow-x:auto; }
+.tbl-head, .tbl-row {
+  display:grid;
+  grid-template-columns: 3.23% 15% 2.5% 14.31% 13.31% 13.31% 13.31% 13.31% 11.72%;
+  gap:0; padding:0 20px; align-items:center;
+}
+.tbl-head {
+  background:var(--bg2); padding:12px 20px; font-size:11px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.06em; color:var(--txt2);
+  border-bottom:1px solid var(--bg3);
+}
+.tbl-head div { text-align:center; }
+.tbl-head div:nth-child(2) { text-align:left; }
+
+.tbl-row {
+  padding:16px 20px; border-bottom:1px solid rgba(51,51,51,.5);
+  transition:background .15s;
+}
+.tbl-row:hover { background:rgba(255,255,255,.02); }
+.tbl-row:last-child { border-bottom:none; }
+
+.r-num { color:var(--txt2); font-size:13px; font-weight:600; text-align:center; }
+.r-name { font-weight:600; font-size:14px; }
+.sal-cell { text-align:center; padding:0 5px; }
+.s-amt { font-size:13px; font-weight:600; display:block; }
+.s-pct { font-size:10px; color:var(--txt2); margin-top:2px; display:block; }
+.s-badge {
+  display:inline-block; padding:2px 6px; border-radius:3px;
+  font-size:9px; font-weight:700; letter-spacing:.04em;
+}
+.s-gtd { background:rgba(16,185,129,.15); color:var(--green); border:1px solid rgba(16,185,129,.3); }
+.s-po { background:rgba(59,130,246,.15); color:var(--blue); border:1px solid rgba(59,130,246,.3); }
+.s-to { background:rgba(236,72,153,.15); color:var(--pink); border:1px solid rgba(236,72,153,.3); }
+
+.act { display:grid; grid-template-columns:1fr; gap:4px; padding-left:8px; }
+.act-btn {
+  background:var(--bg2); border:1px solid var(--bg3); color:var(--txt);
+  padding:5px 8px; border-radius:4px; font-size:10px; font-weight:600;
+  cursor:pointer; transition:.15s; text-align:center; display:flex;
+  align-items:center; justify-content:center; gap:3px; white-space:nowrap;
+}
+.act-btn:hover { background:var(--bg3); transform:translateY(-1px); }
+
+/* ═══ CAP FIGURES ═══ */
+.cap-figures-grid {
+  display:grid;
+  grid-template-columns: 3.23% 15% 2.5% 14.31% 13.31% 13.31% 13.31% 13.31% 11.72%;
+  gap:0; padding:12px 20px;
+}
+.cap-figures-grid div { text-align:center; font-size:13px; font-weight:600; }
+.cap-figures-grid div:nth-child(2) { text-align:left; }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 1400px) {
+  .team-grid { grid-template-columns:repeat(4,1fr); }
+}
+@media (max-width: 1100px) {
+  .team-grid { grid-template-columns:repeat(3,1fr); }
+}
+@media (max-width: 768px) {
+  .team-grid { grid-template-columns:repeat(2,1fr); gap:16px; }
+  .controls { grid-template-columns:1fr; max-height:none; }
+  .controls-left { grid-template-columns:1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// NBA TEAM DATA
+// ═══════════════════════════════════════════════════════════════════
+const NBA_TEAMS = [
+  {id:1, name:"Atlanta Hawks", abbr:"ATL", color:"#E03A3E", logo:"https://cdn.nba.com/logos/nba/1610612737/primary/L/logo.svg"},
+  {id:2, name:"Boston Celtics", abbr:"BOS", color:"#007A33", logo:"https://cdn.nba.com/logos/nba/1610612738/primary/L/logo.svg"},
+  {id:3, name:"Brooklyn Nets", abbr:"BKN", color:"#000000", logo:"https://cdn.nba.com/logos/nba/1610612751/primary/L/logo.svg"},
+  {id:4, name:"Charlotte Hornets", abbr:"CHA", color:"#1D1160", logo:"https://cdn.nba.com/logos/nba/1610612766/primary/L/logo.svg"},
+  {id:5, name:"Chicago Bulls", abbr:"CHI", color:"#CE1141", logo:"https://cdn.nba.com/logos/nba/1610612741/primary/L/logo.svg"},
+  {id:6, name:"Cleveland Cavaliers", abbr:"CLE", color:"#6F263D", logo:"https://cdn.nba.com/logos/nba/1610612739/primary/L/logo.svg"},
+  {id:7, name:"Dallas Mavericks", abbr:"DAL", color:"#00538C", logo:"https://cdn.nba.com/logos/nba/1610612742/primary/L/logo.svg"},
+  {id:8, name:"Denver Nuggets", abbr:"DEN", color:"#0E2240", logo:"https://cdn.nba.com/logos/nba/1610612743/primary/L/logo.svg"},
+  {id:9, name:"Detroit Pistons", abbr:"DET", color:"#C8102E", logo:"https://cdn.nba.com/logos/nba/1610612765/primary/L/logo.svg"},
+  {id:10, name:"Golden State Warriors", abbr:"GSW", color:"#1D428A", logo:"https://cdn.nba.com/logos/nba/1610612744/primary/L/logo.svg"},
+  {id:11, name:"Houston Rockets", abbr:"HOU", color:"#CE1141", logo:"https://cdn.nba.com/logos/nba/1610612745/primary/L/logo.svg"},
+  {id:12, name:"Indiana Pacers", abbr:"IND", color:"#002D62", logo:"https://cdn.nba.com/logos/nba/1610612754/primary/L/logo.svg"},
+  {id:13, name:"LA Clippers", abbr:"LAC", color:"#C8102E", logo:"https://cdn.nba.com/logos/nba/1610612746/primary/L/logo.svg"},
+  {id:14, name:"Los Angeles Lakers", abbr:"LAL", color:"#552583", logo:"https://cdn.nba.com/logos/nba/1610612747/primary/L/logo.svg"},
+  {id:15, name:"Memphis Grizzlies", abbr:"MEM", color:"#5D76A9", logo:"https://cdn.nba.com/logos/nba/1610612763/primary/L/logo.svg"},
+  {id:16, name:"Miami Heat", abbr:"MIA", color:"#98002E", logo:"https://cdn.nba.com/logos/nba/1610612748/primary/L/logo.svg"},
+  {id:17, name:"Milwaukee Bucks", abbr:"MIL", color:"#00471B", logo:"https://cdn.nba.com/logos/nba/1610612749/primary/L/logo.svg"},
+  {id:18, name:"Minnesota Timberwolves", abbr:"MIN", color:"#0C2340", logo:"https://cdn.nba.com/logos/nba/1610612750/primary/L/logo.svg"},
+  {id:19, name:"New Orleans Pelicans", abbr:"NOP", color:"#0C2340", logo:"https://cdn.nba.com/logos/nba/1610612740/primary/L/logo.svg"},
+  {id:20, name:"New York Knicks", abbr:"NYK", color:"#006BB6", logo:"https://cdn.nba.com/logos/nba/1610612752/primary/L/logo.svg"},
+  {id:21, name:"Oklahoma City Thunder", abbr:"OKC", color:"#007AC1", logo:"https://cdn.nba.com/logos/nba/1610612760/primary/L/logo.svg"},
+  {id:22, name:"Orlando Magic", abbr:"ORL", color:"#0077C0", logo:"https://cdn.nba.com/logos/nba/1610612753/primary/L/logo.svg"},
+  {id:23, name:"Philadelphia 76ers", abbr:"PHI", color:"#006BB6", logo:"https://cdn.nba.com/logos/nba/1610612755/primary/L/logo.svg"},
+  {id:24, name:"Phoenix Suns", abbr:"PHX", color:"#1D1160", logo:"https://cdn.nba.com/logos/nba/1610612756/primary/L/logo.svg"},
+  {id:25, name:"Portland Trail Blazers", abbr:"POR", color:"#E03A3E", logo:"https://cdn.nba.com/logos/nba/1610612757/primary/L/logo.svg"},
+  {id:26, name:"Sacramento Kings", abbr:"SAC", color:"#5A2D81", logo:"https://cdn.nba.com/logos/nba/1610612758/primary/L/logo.svg"},
+  {id:27, name:"San Antonio Spurs", abbr:"SAS", color:"#C4CED4", logo:"https://cdn.nba.com/logos/nba/1610612759/primary/L/logo.svg"},
+  {id:28, name:"Toronto Raptors", abbr:"TOR", color:"#CE1141", logo:"https://cdn.nba.com/logos/nba/1610612761/primary/L/logo.svg"},
+  {id:29, name:"Utah Jazz", abbr:"UTA", color:"#002B5C", logo:"https://cdn.nba.com/logos/nba/1610612762/primary/L/logo.svg"},
+  {id:30, name:"Washington Wizards", abbr:"WAS", color:"#002B5C", logo:"https://cdn.nba.com/logos/nba/1610612764/primary/L/logo.svg"}
+];
+
+// Salary Cap Data
+const CAP_DATA = {
+  2025: { cap: 154647000, tax: 187895000, apron1: 195945000, apron2: 207824000 },
+  2026: { cap: 165500000, tax: 201000000, apron1: 209700000, apron2: 222900000 },
+  2027: { cap: 173700000, tax: 215100000, apron1: 224300000, apron2: 238900000 },
+  2028: { cap: 182400000, tax: 230200000, apron1: 240000000, apron2: 256000000 }
+};
+</script>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+
 </body>
 </html>
