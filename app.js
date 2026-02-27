@@ -1,259 +1,447 @@
-// NBA GM - Main Application
-// Bulls Cap Sheet Style UI
+// ═══════════════════════════════════════════════════════════════════
+// NBA GM - MAIN APPLICATION
+// Bulls Cap Sheet Style for All 30 Teams
+// ═══════════════════════════════════════════════════════════════════
 
-const { useState, useEffect } = React;
+let currentTeam = null;
+let roster = [];
 
-function NBACapManager() {
-    const [selectedTeam, setSelectedTeam] = useState(null);
-    const [roster, setRoster] = useState([]);
+// ═══════════════════════════════════════════════════════════════════
+// INITIALIZATION
+// ═══════════════════════════════════════════════════════════════════
 
-    useEffect(() => {
-        if (selectedTeam) {
-            setRoster(NBA_DATA.rosters[selectedTeam.id] || []);
-        }
-    }, [selectedTeam]);
-
-    const getTotalSalary = (year) => {
-        return roster.reduce((sum, p) => {
-            if (year === '2025') return sum + p.salary2025;
-            if (year === '2026') return sum + (p.salary2026 || 0);
-            if (year === '2027') return sum + (p.salary2027 || 0);
-            if (year === '2028') return sum + (p.salary2028 || 0);
-            return sum;
-        }, 0);
-    };
-
-    const formatMoney = (amount) => {
-        if (!amount || amount === 0) return '-';
-        return '$' + (amount / 1000000).toFixed(2) + 'M';
-    };
-
-    const formatMoneyShort = (amount) => {
-        if (!amount || amount === 0) return '-';
-        return '$' + (amount / 1000000).toFixed(1) + 'M';
-    };
-
-    // Team Selection Screen
-    if (!selectedTeam) {
-        return (
-            <div className="min-h-screen gradient-bg py-12 px-4">
-                <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-12">
-                        <h1 className="text-5xl font-black text-white mb-4">NBA GM</h1>
-                        <p className="text-xl text-purple-100">You're the GM: manage your team's roster</p>
-                    </div>
-                    
-                    <div className="bg-white rounded-2xl shadow-2xl p-8">
-                        <h2 className="text-2xl font-bold mb-6 text-gray-800">Select Your Team</h2>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                            {NBA_DATA.teams.map(team => (
-                                <button
-                                    key={team.id}
-                                    onClick={() => setSelectedTeam(team)}
-                                    className="card-hover bg-white border-2 border-gray-200 rounded-xl p-4 text-center hover:border-purple-500"
-                                >
-                                    <img 
-                                        src={team.logo}
-                                        alt={team.name}
-                                        className="w-16 h-16 mx-auto mb-3 object-contain"
-                                    />
-                                    <h3 className="font-bold text-sm text-gray-800">{team.name}</h3>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    // Calculate cap numbers
-    const salary2025 = getTotalSalary('2025');
-    const salary2026 = getTotalSalary('2026');
-    const salary2027 = getTotalSalary('2027');
-    const salary2028 = getTotalSalary('2028');
-    const capSpace = NBA_DATA.salaryCap - salary2025;
-    const luxuryTaxAmount = salary2025 > NBA_DATA.luxuryTax ? (salary2025 - NBA_DATA.luxuryTax) * 1.5 : 0;
-
-    // Main GM Interface - Bulls Cap Sheet Style
-    return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Header */}
-            <div className="gradient-bg text-white py-6 px-4 shadow-lg">
-                <div className="max-w-full mx-auto px-4">
-                    <div className="flex items-center justify-between flex-wrap gap-4">
-                        <div className="flex items-center gap-4">
-                            <img 
-                                src={selectedTeam.logo}
-                                alt={selectedTeam.name}
-                                className="w-16 h-16 object-contain"
-                            />
-                            <div>
-                                <h1 className="text-3xl font-black">{selectedTeam.name}</h1>
-                                <p className="text-purple-200">Salary Cap Manager</p>
-                            </div>
-                        </div>
-                        <button
-                            onClick={() => setSelectedTeam(null)}
-                            className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg font-semibold transition"
-                        >
-                            ← Back to Teams
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Cap Summary */}
-            <div className="max-w-full mx-auto px-4 py-6">
-                <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        <div>
-                            <div className="text-sm text-gray-500 mb-1">Total Payroll (2025-26)</div>
-                            <div className="text-2xl font-bold text-gray-800">{formatMoneyShort(salary2025)}</div>
-                        </div>
-                        <div>
-                            <div className="text-sm text-gray-500 mb-1">Cap Space</div>
-                            <div className={`text-2xl font-bold ${capSpace >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {formatMoneyShort(Math.abs(capSpace))}
-                            </div>
-                            <div className="text-xs text-gray-400">Salary Cap: {formatMoneyShort(NBA_DATA.salaryCap)}</div>
-                        </div>
-                        <div>
-                            <div className="text-sm text-gray-500 mb-1">Luxury Tax Bill</div>
-                            <div className={`text-2xl font-bold ${luxuryTaxAmount > 0 ? 'text-red-600' : 'text-gray-800'}`}>
-                                {formatMoneyShort(luxuryTaxAmount)}
-                            </div>
-                            <div className="text-xs text-gray-400">Tax Line: {formatMoneyShort(NBA_DATA.luxuryTax)}</div>
-                        </div>
-                        <div>
-                            <div className="text-sm text-gray-500 mb-1">Roster Count</div>
-                            <div className="text-2xl font-bold text-gray-800">{roster.length}/15</div>
-                            <div className="text-xs text-gray-400">Active Players</div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Player Contracts Table - Bulls Style */}
-                <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div className="p-6 border-b border-gray-200">
-                        <h2 className="text-2xl font-bold text-gray-800">Player Contracts</h2>
-                    </div>
-                    
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-gray-50 border-b border-gray-200">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider sticky left-0 bg-gray-50 z-10">
-                                        Player
-                                    </th>
-                                    <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        Age
-                                    </th>
-                                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        2025-26
-                                    </th>
-                                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        2026-27
-                                    </th>
-                                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        2027-28
-                                    </th>
-                                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        2028-29
-                                    </th>
-                                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        Guaranteed
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        Options
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {roster.map((player, idx) => (
-                                    <tr key={player.id} className="hover:bg-gray-50 transition">
-                                        <td className="px-6 py-4 whitespace-nowrap sticky left-0 bg-white z-10">
-                                            <div className="font-semibold text-gray-900">{player.name}</div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600">
-                                            {player.age}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900">
-                                            {formatMoney(player.salary2025)}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-600">
-                                            {formatMoney(player.salary2026)}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-600">
-                                            {formatMoney(player.salary2027)}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-600">
-                                            {formatMoney(player.salary2028)}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-semibold text-green-700">
-                                            {formatMoney(player.guaranteed)}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                            {player.optionType && (
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                    {player.optionType}
-                                                </span>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                                
-                                {/* Total Row */}
-                                <tr className="bg-gray-100 font-bold border-t-2 border-gray-300">
-                                    <td className="px-6 py-4 whitespace-nowrap text-gray-900 sticky left-0 bg-gray-100 z-10">
-                                        TEAM TOTAL
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-center text-gray-600">
-                                        {roster.length}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-gray-900">
-                                        {formatMoney(salary2025)}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-gray-900">
-                                        {formatMoney(salary2026)}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-gray-900">
-                                        {formatMoney(salary2027)}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-gray-900">
-                                        {formatMoney(salary2028)}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-gray-900">
-                                        {formatMoney(roster.reduce((sum, p) => sum + (p.guaranteed || 0), 0))}
-                                    </td>
-                                    <td className="px-6 py-4"></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {/* Cap Status Footer */}
-                    <div className="p-6 bg-gray-50 border-t border-gray-200">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                            <div>
-                                <span className="text-gray-600">Salary Cap:</span>
-                                <span className="ml-2 font-semibold text-gray-900">{formatMoneyShort(NBA_DATA.salaryCap)}</span>
-                            </div>
-                            <div>
-                                <span className="text-gray-600">Luxury Tax:</span>
-                                <span className="ml-2 font-semibold text-gray-900">{formatMoneyShort(NBA_DATA.luxuryTax)}</span>
-                            </div>
-                            <div>
-                                <span className="text-gray-600">First Apron:</span>
-                                <span className="ml-2 font-semibold text-gray-900">{formatMoneyShort(NBA_DATA.firstApron)}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+function init() {
+  showTeamSelection();
 }
 
-// Render the app
-ReactDOM.render(<NBACapManager />, document.getElementById('root'));
+// ═══════════════════════════════════════════════════════════════════
+// TEAM SELECTION SCREEN
+// ═══════════════════════════════════════════════════════════════════
+
+function showTeamSelection() {
+  currentTeam = null;
+  const html = `
+    <div class="team-select-screen">
+      <div class="team-select-header">
+        <h1>NBA GM</h1>
+        <p>Select your team to manage rosters and salary cap</p>
+      </div>
+      <div class="team-grid">
+        ${NBA_TEAMS.map(team => `
+          <div class="team-card" onclick="selectTeam('${team.abbr}')">
+            <img src="${team.logo}" alt="${team.name}" class="team-logo">
+            <div class="team-name">${team.name}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  document.getElementById('app').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TEAM SELECTION
+// ═══════════════════════════════════════════════════════════════════
+
+function selectTeam(teamAbbr) {
+  currentTeam = NBA_TEAMS.find(t => t.abbr === teamAbbr);
+  if (!currentTeam) return;
+  
+  // Load roster data
+  roster = ALL_ROSTERS[teamAbbr] || [];
+  
+  // Set team colors
+  document.documentElement.style.setProperty('--team-color', currentTeam.color);
+  document.documentElement.style.setProperty('--team-dark', shadeColor(currentTeam.color, -20));
+  
+  // Show cap manager
+  showCapManager();
+}
+
+// Helper: Darken color
+function shadeColor(color, percent) {
+  const num = parseInt(color.replace("#",""), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = (num >> 16) + amt;
+  const G = (num >> 8 & 0x00FF) + amt;
+  const B = (num & 0x0000FF) + amt;
+  return "#" + (0x1000000 + (R<255?R<1?0:R:255)*0x10000 +
+    (G<255?G<1?0:G:255)*0x100 + (B<255?B<1?0:B:255))
+    .toString(16).slice(1);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CAP MANAGER SCREEN
+// ═══════════════════════════════════════════════════════════════════
+
+function showCapManager() {
+  const html = `
+    <div class="container">
+      ${renderHeader()}
+      ${renderControls()}
+      ${renderActiveRoster()}
+      ${renderCapSituation()}
+      ${renderCapFigures()}
+    </div>
+  `;
+  document.getElementById('app').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// HEADER
+// ═══════════════════════════════════════════════════════════════════
+
+function renderHeader() {
+  return `
+    <div class="header">
+      <div class="header-top">
+        <img src="${currentTeam.logo}" alt="${currentTeam.name}" class="header-logo">
+        <div>
+          <h1>🏀 ${currentTeam.name} Cap Manager</h1>
+          <div class="sub">Manage your team's roster and salary cap situation</div>
+        </div>
+        <button class="back-btn" onclick="showTeamSelection()">← Back to Teams</button>
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CONTROLS
+// ═══════════════════════════════════════════════════════════════════
+
+function renderControls() {
+  const capSpace2025 = CAP_DATA[2025].cap - getTotalSalary(2025);
+  const taxSpace2025 = CAP_DATA[2025].tax - getTotalSalary(2025);
+  
+  return `
+    <div class="controls">
+      <!-- Left: Action Buttons -->
+      <div class="controls-left">
+        <button class="btn" title="Add or remove players">👥 MANAGE ROSTER</button>
+        <button class="btn btn-red" title="Build trades">🔄 TRADE MACHINE</button>
+        <button class="btn" title="Sign free agents">✍️ SIGN FAs</button>
+        <button class="btn" title="View draft picks">📋 PICKS</button>
+        <button class="btn" title="View exceptions">💰 EXCEPTIONS</button>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px;">
+          <button class="btn" title="Undo">◀</button>
+          <button class="btn" title="Redo">▶</button>
+          <button class="btn" onclick="resetRoster()" title="Reset">🗑️</button>
+        </div>
+      </div>
+      
+      <!-- Middle: Cap Situation -->
+      <div class="cap-summary">
+        <div class="cap-summary-title">2025-26 CAP SITUATION</div>
+        <div class="cap-summary-grid">
+          <div class="cap-summary-item">
+            <div class="cap-summary-label">CAP SPACE</div>
+            <div class="cap-summary-value ${capSpace2025 >= 0 ? 'cap-value-green' : 'cap-value-red'}">
+              ${formatMoney(Math.abs(capSpace2025), true)}
+            </div>
+          </div>
+          <div class="cap-summary-item">
+            <div class="cap-summary-label">TAX SPACE</div>
+            <div class="cap-summary-value ${taxSpace2025 >= 0 ? 'cap-value-green' : 'cap-value-red'}">
+              ${formatMoney(Math.abs(taxSpace2025), true)}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right: Legend -->
+      <div class="legend">
+        <div class="legend-title">LEGEND</div>
+        <div class="legend-items">
+          <div class="legend-item"><span class="lg-badge lg-gtd">GTD</span> Guaranteed</div>
+          <div class="legend-item"><span class="lg-badge lg-po">PO</span> Player Option</div>
+          <div class="legend-item"><span class="lg-badge lg-to">TO</span> Team Option</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ACTIVE ROSTER TABLE
+// ═══════════════════════════════════════════════════════════════════
+
+function renderActiveRoster() {
+  const count2025 = roster.filter(p => p.sal2025 > 0).length;
+  const count2026 = roster.filter(p => p.sal2026 > 0).length;
+  const count2027 = roster.filter(p => p.sal2027 > 0).length;
+  const count2028 = roster.filter(p => p.sal2028 > 0).length;
+  
+  return `
+    <div class="section">
+      <div class="section-hdr" style="display:grid; grid-template-columns: 3.23% 15% 2.5% 14.31% 13.31% 13.31% 13.31% 13.31% 11.72%; gap:0; padding:14px 20px; align-items:center;">
+        <div></div>
+        <div style="font-weight:700; font-size:14px">Active Roster</div>
+        <div></div>
+        <div style="text-align:center; font-weight:700; font-size:14px">2025-26</div>
+        <div style="text-align:center; font-weight:700; font-size:14px">2026-27</div>
+        <div style="text-align:center; font-weight:700; font-size:14px">2027-28</div>
+        <div style="text-align:center; font-weight:700; font-size:14px">2028-29</div>
+        <div style="text-align:center; font-weight:700; font-size:14px">2029-30</div>
+        <div></div>
+      </div>
+      <div class="tbl-wrap">
+        <div class="tbl-head">
+          <div>#</div>
+          <div>Player</div>
+          <div>Age</div>
+          <div style="text-align:center"><div style="font-size:9px; font-weight:600; color:var(--txt2); text-transform:none">${count2025} players</div></div>
+          <div style="text-align:center"><div style="font-size:9px; font-weight:600; color:var(--txt2); text-transform:none">${count2026} players</div></div>
+          <div style="text-align:center"><div style="font-size:9px; font-weight:600; color:var(--txt2); text-transform:none">${count2027} players</div></div>
+          <div style="text-align:center"><div style="font-size:9px; font-weight:600; color:var(--txt2); text-transform:none">${count2028} players</div></div>
+          <div style="text-align:center"><div style="font-size:9px; font-weight:600; color:var(--txt2); text-transform:none">-</div></div>
+          <div>Actions</div>
+        </div>
+        ${roster.map((player, idx) => renderPlayerRow(player, idx + 1)).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderPlayerRow(player, num) {
+  return `
+    <div class="tbl-row">
+      <div class="r-num">${num}</div>
+      <div class="r-name">${player.name}</div>
+      <div class="r-num">${player.age || '-'}</div>
+      ${renderSalaryCell(player.sal2025, player, 2025)}
+      ${renderSalaryCell(player.sal2026, player, 2026)}
+      ${renderSalaryCell(player.sal2027, player, 2027)}
+      ${renderSalaryCell(player.sal2028, player, 2028)}
+      ${renderSalaryCell(0, player, 2029)}
+      <div class="act">
+        <button class="act-btn" onclick="editPlayer(${num-1})">📝 Edit</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderSalaryCell(salary, player, year) {
+  if (!salary || salary === 0) return `<div class="sal-cell">-</div>`;
+  
+  const pct = (salary / CAP_DATA[year].cap * 100).toFixed(1);
+  let badge = '';
+  
+  if (year === 2025 && player.guaranteed > 0) {
+    badge = '<span class="s-badge s-gtd">GTD</span>';
+  }
+  if (player.optionType === 'Player Option') {
+    badge = '<span class="s-badge s-po">PO</span>';
+  }
+  if (player.optionType === 'Team Option') {
+    badge = '<span class="s-badge s-to">TO</span>';
+  }
+  
+  return `
+    <div class="sal-cell">
+      <span class="s-amt">${formatMoney(salary)}</span>
+      <span class="s-pct">${pct}% ${badge}</span>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CAP SITUATION
+// ═══════════════════════════════════════════════════════════════════
+
+function renderCapSituation() {
+  const years = [2025, 2026, 2027, 2028, 2029];
+  const situations = [
+    'Team Salary',
+    'Cap Space',
+    'Tax Space',
+    'Apron 1 Space',
+    'Apron 2 Space'
+  ];
+  
+  return `
+    <div class="section">
+      <div class="section-hdr">📊 Cap Situation</div>
+      <div style="padding:0">
+        <div class="cap-figures-grid" style="border-bottom:1px solid var(--bg3); padding-top:12px; padding-bottom:8px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--txt2)">
+          <div></div>
+          <div style="text-align:left">Status</div>
+          <div></div>
+          <div>2025-26</div>
+          <div>2026-27</div>
+          <div>2027-28</div>
+          <div>2028-29</div>
+          <div>2029-30</div>
+          <div></div>
+        </div>
+        
+        <!-- Team Salary -->
+        <div class="cap-figures-grid" style="border-bottom:1px solid rgba(51,51,51,.3)">
+          <div></div>
+          <div style="text-align:left; font-weight:600; font-size:14px">Team Salary</div>
+          <div></div>
+          <div>${formatMoney(getTotalSalary(2025))}</div>
+          <div>${formatMoney(getTotalSalary(2026))}</div>
+          <div>${formatMoney(getTotalSalary(2027))}</div>
+          <div>${formatMoney(getTotalSalary(2028))}</div>
+          <div>-</div>
+          <div></div>
+        </div>
+        
+        <!-- Cap Space -->
+        <div class="cap-figures-grid" style="border-bottom:1px solid rgba(51,51,51,.3)">
+          <div></div>
+          <div style="text-align:left; font-weight:600; font-size:14px">Cap Space</div>
+          <div></div>
+          <div class="${CAP_DATA[2025].cap - getTotalSalary(2025) >= 0 ? 'cap-value-green' : 'cap-value-red'}">
+            ${formatMoney(CAP_DATA[2025].cap - getTotalSalary(2025))}
+          </div>
+          <div class="${CAP_DATA[2026].cap - getTotalSalary(2026) >= 0 ? 'cap-value-green' : 'cap-value-red'}">
+            ${formatMoney(CAP_DATA[2026].cap - getTotalSalary(2026))}
+          </div>
+          <div class="${CAP_DATA[2027].cap - getTotalSalary(2027) >= 0 ? 'cap-value-green' : 'cap-value-red'}">
+            ${formatMoney(CAP_DATA[2027].cap - getTotalSalary(2027))}
+          </div>
+          <div class="${CAP_DATA[2028].cap - getTotalSalary(2028) >= 0 ? 'cap-value-green' : 'cap-value-red'}">
+            ${formatMoney(CAP_DATA[2028].cap - getTotalSalary(2028))}
+          </div>
+          <div>-</div>
+          <div></div>
+        </div>
+        
+        <!-- Tax Space -->
+        <div class="cap-figures-grid" style="border-bottom:1px solid rgba(51,51,51,.3)">
+          <div></div>
+          <div style="text-align:left; font-weight:600; font-size:14px">Tax Space</div>
+          <div></div>
+          <div class="${CAP_DATA[2025].tax - getTotalSalary(2025) >= 0 ? 'cap-value-green' : 'cap-value-red'}">
+            ${formatMoney(CAP_DATA[2025].tax - getTotalSalary(2025))}
+          </div>
+          <div class="${CAP_DATA[2026].tax - getTotalSalary(2026) >= 0 ? 'cap-value-green' : 'cap-value-red'}">
+            ${formatMoney(CAP_DATA[2026].tax - getTotalSalary(2026))}
+          </div>
+          <div class="${CAP_DATA[2027].tax - getTotalSalary(2027) >= 0 ? 'cap-value-green' : 'cap-value-red'}">
+            ${formatMoney(CAP_DATA[2027].tax - getTotalSalary(2027))}
+          </div>
+          <div class="${CAP_DATA[2028].tax - getTotalSalary(2028) >= 0 ? 'cap-value-green' : 'cap-value-red'}">
+            ${formatMoney(CAP_DATA[2028].tax - getTotalSalary(2028))}
+          </div>
+          <div>-</div>
+          <div></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CAP FIGURES
+// ═══════════════════════════════════════════════════════════════════
+
+function renderCapFigures() {
+  return `
+    <div class="section">
+      <div class="section-hdr">📋 Cap Figures</div>
+      <div style="padding:0">
+        <div class="cap-figures-grid" style="padding-top:12px; padding-bottom:8px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--txt2)">
+          <div></div>
+          <div style="text-align:left">Threshold</div>
+          <div></div>
+          <div>2025-26</div>
+          <div>2026-27</div>
+          <div>2027-28</div>
+          <div>2028-29</div>
+          <div>2029-30</div>
+          <div></div>
+        </div>
+        
+        <div class="cap-figures-grid" style="border-bottom:1px solid var(--bg3)">
+          <div></div>
+          <div style="text-align:left; font-weight:600; font-size:14px">Salary Cap</div>
+          <div></div>
+          <div>$154.6M</div>
+          <div>$165.5M</div>
+          <div>$173.7M</div>
+          <div>$182.4M</div>
+          <div>$191.6M</div>
+          <div></div>
+        </div>
+        
+        <div class="cap-figures-grid" style="border-bottom:1px solid var(--bg3)">
+          <div></div>
+          <div style="text-align:left; font-weight:600; font-size:14px">Luxury Tax</div>
+          <div></div>
+          <div>$187.9M</div>
+          <div>$201.0M</div>
+          <div>$215.1M</div>
+          <div>$230.2M</div>
+          <div>$246.3M</div>
+          <div></div>
+        </div>
+        
+        <div class="cap-figures-grid" style="border-bottom:1px solid var(--bg3)">
+          <div></div>
+          <div style="text-align:left; font-weight:600; font-size:14px">First Apron</div>
+          <div></div>
+          <div>$195.9M</div>
+          <div>$209.7M</div>
+          <div>$224.3M</div>
+          <div>$240.0M</div>
+          <div>$256.8M</div>
+          <div></div>
+        </div>
+        
+        <div class="cap-figures-grid">
+          <div></div>
+          <div style="text-align:left; font-weight:600; font-size:14px">Second Apron</div>
+          <div></div>
+          <div>$207.8M</div>
+          <div>$222.9M</div>
+          <div>$238.9M</div>
+          <div>$256.0M</div>
+          <div>$274.1M</div>
+          <div></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// UTILITY FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════
+
+function getTotalSalary(year) {
+  return roster.reduce((total, player) => {
+    if (year === 2025) return total + (player.sal2025 || 0);
+    if (year === 2026) return total + (player.sal2026 || 0);
+    if (year === 2027) return total + (player.sal2027 || 0);
+    if (year === 2028) return total + (player.sal2028 || 0);
+    return total;
+  }, 0);
+}
+
+function formatMoney(amount, short = false) {
+  if (!amount || amount === 0) return '-';
+  const m = amount / 1000000;
+  if (short) {
+    return (amount >= 0 ? '+' : '') + '$' + m.toFixed(1) + 'M';
+  }
+  return '$' + m.toFixed(2) + 'M';
+}
+
+function editPlayer(index) {
+  alert(`Edit functionality coming soon for ${roster[index].name}`);
+}
+
+function resetRoster() {
+  if (confirm('Reset to original roster?')) {
+    selectTeam(currentTeam.abbr);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// START APP
+// ═══════════════════════════════════════════════════════════════════
+
+init();
